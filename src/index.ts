@@ -8,22 +8,44 @@ app.use(express.json());
 
 app.post("/todos", async (req, res) => {
   const { title } = req.body;
+
   if (!title) {
-    return res
-      .status(400)
-      .send({ message: "O titulo da tarefa é obrigatório" });
+    return res.status(400).json({
+      message: "O título é obrigatório",
+    });
   }
+
+  if (typeof title !== "string") {
+    return res.status(400).json({
+      message: "O título precisa ser uma string",
+    });
+  }
+
+  if (title.trim() === "") {
+    return res.status(400).json({
+      message: "O título não pode estar vazio",
+    });
+  }
+
+  if (!isNaN(Number(title))) {
+    return res.status(400).json({
+      message: "O título não pode conter apenas números",
+    });
+  }
+
   try {
     const todo = await prisma.todo.create({
       data: {
-        title,
+        title: title.trim(),
       },
     });
-    return res.status(200).json(todo);
+
+    return res.status(201).json(todo);
   } catch (error) {
     console.log(error);
-    return res.status(500).send({
-      message: "Não foi possivel cadastrar um novo item na lista de tarefas",
+
+    return res.status(500).json({
+      message: "Erro ao criar tarefa",
     });
   }
 });
