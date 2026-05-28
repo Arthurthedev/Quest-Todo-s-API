@@ -123,6 +123,30 @@ app.delete("/todos/:id", async (req, res) => {
   }
 });
 
+app.patch("/todos/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  const { done } = req.body;
+
+  if (typeof done !== "boolean") {
+    return res.status(400).json({
+      message: "done precisa ser true ou false",
+    });
+  }
+
+  try {
+    const updated = await prisma.todo.update({
+      where: { id },
+      data: { done },
+    });
+
+    return res.status(200).json(updated);
+  } catch (error) {
+    return res.status(500).json({
+      message: "Erro ao atualizar tarefa",
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Servidor em execução na porta http://localhost:${port}`);
 });
